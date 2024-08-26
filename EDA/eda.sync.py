@@ -73,3 +73,69 @@ df_numeric
 # %%
 corr_var = df_numeric.corr()
 print(corr_var)
+
+# %%
+plt.imshow(corr_var, cmap="coolwarm", interpolation="none")
+plt.colorbar()
+
+plt.xticks(np.arange(len(corr_var.columns)), corr_var.columns)
+plt.yticks(np.arange(len(corr_var.columns)), corr_var.columns)
+
+for i in range(len(corr_var.columns)):
+    for j in range(len(corr_var.columns)):
+        plt.text(j, i, f"{corr_var.iloc[i, j] : .2f}", ha="center", va="center", color="black")
+
+plt.title("Correlation matrix of numerical variables")
+plt.tight_layout()
+
+# %% [markdown]
+# As it was expected, there is no high correlation of variables, being areas and
+# population the closest related by a 0.41 metric. As mentioned before, the
+# higher area allows for a higher population, however due to some countries being
+# huge area but not being densely populate as the (US, China, Russia, Canada),
+# the correlation is less than 5.0.
+
+# %% [markdown]
+# # Population Growth
+
+# %%
+url_pop = "https://raw.githubusercontent.com/DrueStaples/Population_Growth/master/countries.csv"
+df_pop = pd.read_csv(url_pop, sep=",")
+df_pop.head()
+
+# %%
+df_pop.info()
+
+# %%
+df_pop_es = df_pop[df_pop["country"] == "Spain"]
+df_pop_es.head()
+
+# %%
+df_pop_es["population"].plot.bar()
+plt.xlabel("Year")
+plt.ylabel("Population")
+plt.show()
+
+# %%
+df_pop_esar = df_pop[df_pop["country"].isin(["Argentina", "Spain"])]
+df_pop_esar.head()
+
+# %%
+pivoted = df_pop_esar.pivot(index='year', columns='country', values='population')
+pivoted.plot.bar(figsize=(12, 6))
+plt.title('Population Comparison: Country A vs. Country B')
+plt.ylabel('Population')
+plt.show()
+
+# %% [markdown]
+# The graph allows to see the population growth of Spain and Argentina,
+# while in 1952 the difference is less than half of Spain population, on 2007
+# that difference decreases by a lot.
+# It shows how the population growth Argentina experienced was bigger than Spain's
+
+# %%
+df_es = df[df["languages"].notnull() & df["languages"].str.startswith("es")]
+df_es.info()
+
+# %%
+df_es.head(20)
