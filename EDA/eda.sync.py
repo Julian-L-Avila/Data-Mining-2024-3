@@ -123,7 +123,7 @@ df_pop_esar.head()
 # %%
 pivoted = df_pop_esar.pivot(index='year', columns='country', values='population')
 pivoted.plot.bar(figsize=(12, 6))
-plt.title('Population Comparison: Country A vs. Country B')
+plt.title('Population Comparison: Spain vs. Argentina')
 plt.ylabel('Population')
 plt.show()
 
@@ -135,7 +135,72 @@ plt.show()
 
 # %%
 df_es = df[df["languages"].notnull() & df["languages"].str.startswith("es")]
+df_es = df_es[["name", "population"]]
 df_es.info()
 
 # %%
 df_es.head(20)
+
+# %%
+df_pop_sp = df_pop[df_pop["country"].isin(df_es["name"])]
+df_pop_sp.head(20)
+
+# %%
+df_pop_sp.info()
+
+# %%
+pivoted = df_pop_sp.pivot(index='year', columns='country', values='population')
+pivoted.plot.bar(figsize=(12, 6))
+plt.title('Population Comparison')
+plt.ylabel('Population')
+plt.show()
+
+# %% [markdown]
+# The graph is not clear to distinguished, as Chile or Mexico seem to have a
+# bigger population than the rest of countries.
+
+# %%
+df_pop_sp.head(20)
+
+# %%
+pivoted.head(20)
+
+# %%
+pivoted_year = df_pop_sp.pivot(index='country', columns='year', values='population')
+pivoted_year.head(20)
+
+# %%
+pivoted_year.describe()
+
+# %%
+pivoted_year.plot.box()
+
+# %%
+df_without_outliers = pivoted_year.copy()
+for column in pivoted_year.columns:
+    mean = pivoted_year[column].mean()
+    std_dev = pivoted_year[column].std()
+    threshold = 2 * std_dev
+
+    mask = (pivoted_year[column] < mean - threshold) | (pivoted_year[column] > mean + threshold)
+
+    df_without_outliers.loc[mask, column] = pd.NA
+
+df_without_outliers.head(20)
+
+# %% [markdown]
+# After removing the outliers, it can be seen that it was indeed Mexico the one
+# much higher that the others in terms on population.
+# However, Spain was also an outlier on three occasions.
+
+# %%
+df_without_outliers.plot.box()
+
+# %% [markdown]
+# # Categoric Data
+
+# %%
+df.info()
+
+# %%
+df_pop.info()
