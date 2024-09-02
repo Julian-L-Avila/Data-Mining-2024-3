@@ -117,3 +117,10 @@ null_cargo_monto.isna().sum()
 df_cargo = df_cargo.dropna(subset=['denominacion', 'cargo'], thresh=2)
 
 df_cargo.isna().sum()
+
+# %%
+print(df.shape)
+print(df_cargo.shape)
+
+# %%
+df_cargo
