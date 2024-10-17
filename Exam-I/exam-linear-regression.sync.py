@@ -137,7 +137,6 @@ plot_collage(df_2, 'Weather History', 'month', 'temperature', 'humidity')
 plot_collage(df_1, 'Solar Prediction', 'humidity', 'temperature', 'month')
 plot_collage(df_2, 'Solar Prediction', 'humidity', 'temperature', 'month')
 
-
 # %%
 def run_linear_regression(df, target, feature):
     X = df[[feature]].values
@@ -187,6 +186,42 @@ for i in features:
     linear_model = run_linear_regression(df_1, target='temperature', feature=i)
 
 multilinear_model = run_multilinear_regression(df_1, target='temperature', features=features)
+
+# %%
+def run_regression(df, target, features):
+    X = df[features].values
+    y = df[target].values
+
+    if len(X.shape) == 1:
+        X = X.reshape(-1, 1)
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+
+    print(f'{target} vs {features}')
+    print(f'MSE: {mean_squared_error(y_test, y_pred)}, R²: {r2_score(y_test, y_pred)}')
+
+    plt.figure(figsize=(10, 6))
+    plt.scatter(X_test[:, 0], y_test, alpha=0.6, color='b', label='Actual')
+    plt.plot(X_test[:, 0], y_pred, color='r', lw=2, label='Predicted')
+    plt.xlabel(f'{features[0]}')
+    plt.ylabel(target.capitalize())
+    plt.title(f'{target.capitalize()} vs {features[0]}')
+    plt.legend()
+    plt.show()
+
+    return model
+
+features = ['humidity', 'speed', 'direction', 'month']
+
+for i in features:
+    linear_model = run_regression(df_1, target='temperature', features=i)
+
+multilinear_model = run_regression(df_1, target='temperature', features=features)
 
 # %%
 df = df_1
