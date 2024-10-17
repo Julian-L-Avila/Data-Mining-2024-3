@@ -105,43 +105,6 @@ def calculate_monthly_averages(df):
         )
     )
 
-def plot_temperature_collage(df, title, num_cols=3):
-    unique_years = df['year'].unique()
-    num_rows = (len(unique_years) + num_cols - 1) // num_cols
-    fig = plt.figure(figsize=(15, 5 * num_rows))
-    grid = GridSpec(num_rows, num_cols, figure=fig)
-
-    for idx, year in enumerate(unique_years):
-        ax = fig.add_subplot(grid[idx // num_cols, idx % num_cols])
-        yearly_data = df[df['year'] == year]
-        scatter = ax.scatter(yearly_data['month'], yearly_data['temperature'],
-                             c=yearly_data['humidity'], cmap='viridis')
-        ax.set_title(f'{title} - {year}')
-        ax.set_xlabel('Month')
-        ax.set_ylabel('Temperature')
-
-    fig.colorbar(scatter, ax=ax, label='Humidity', orientation='horizontal')
-    plt.tight_layout()
-    plt.show()
-
-def plot_temperature_collage_humidity(df, title, num_cols=3):
-    unique_years = df['year'].unique()
-    num_rows = (len(unique_years) + num_cols - 1) // num_cols
-    fig = plt.figure(figsize=(15, 5 * num_rows))
-    grid = GridSpec(num_rows, num_cols, figure=fig)
-
-    for idx, year in enumerate(unique_years):
-        ax = fig.add_subplot(grid[idx // num_cols, idx % num_cols])
-        yearly_data = df[df['year'] == year]
-        scatter = ax.scatter(yearly_data['humidity'], yearly_data['temperature'],
-                             c=yearly_data['month'], cmap='viridis')
-        ax.set_title(f'{title} - {year}')
-        ax.set_xlabel('Humidity')
-        ax.set_ylabel('Temperature')
-
-    fig.colorbar(scatter, ax=ax, label='Month', orientation='horizontal')
-    plt.tight_layout()
-
 def prepare_data(df, date_cols):
     df['datetime'] = pd.to_datetime(df[date_cols])
     df.set_index('datetime', inplace=True)
@@ -150,10 +113,30 @@ def prepare_data(df, date_cols):
 df_1 = prepare_data(df_1, ['year', 'month', 'day', 'hour', 'minute'])
 df_2 = prepare_data(df_2, ['year', 'month', 'day', 'hour', 'minute'])
 
-plot_temperature_collage(df_1, 'Weather History')
-plot_temperature_collage(df_2, 'Solar Prediction')
-plot_temperature_collage_humidity(df_1, 'Weather History')
-plot_temperature_collage_humidity(df_2, 'Solar Prediction')
+def plot_collage(df, title, feature_x, feature_y, color_feature, num_cols=3):
+    unique_years = df['year'].unique()
+    num_rows = (len(unique_years) + num_cols - 1) // num_cols
+    fig = plt.figure(figsize=(15, 5 * num_rows))
+    grid = GridSpec(num_rows, num_cols, figure=fig)
+
+    for idx, year in enumerate(unique_years):
+        ax = fig.add_subplot(grid[idx // num_cols, idx % num_cols])
+        yearly_data = df[df['year'] == year]
+        scatter = ax.scatter(yearly_data[feature_x], yearly_data[feature_y],
+                             c=yearly_data[color_feature], cmap='viridis')
+        ax.set_title(f'{title} - {year}')
+        ax.set_xlabel(feature_x.capitalize())
+        ax.set_ylabel(feature_y.capitalize())
+
+    fig.colorbar(scatter, ax=ax, label=color_feature.capitalize(), orientation='horizontal')
+    plt.tight_layout()
+    plt.show()
+
+plot_collage(df_1, 'Weather History', 'month', 'temperature', 'humidity')
+plot_collage(df_2, 'Weather History', 'month', 'temperature', 'humidity')
+plot_collage(df_1, 'Solar Prediction', 'humidity', 'temperature', 'month')
+plot_collage(df_2, 'Solar Prediction', 'humidity', 'temperature', 'month')
+
 
 # %%
 def run_linear_regression(df, target, feature):
@@ -207,186 +190,64 @@ multilinear_model = run_multilinear_regression(df_1, target='temperature', featu
 
 # %%
 df = df_1
-
 df['month'] = df.index.month
-features = ['month']
-X = df[features]
-y = df['temperature']
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def plot_predictions(X_test, y_test, y_pred, x_feature='month'):
+    plt.figure(figsize=(10, 6))
+    plt.scatter(X_test[x_feature], y_test, alpha=0.6, color='b', label='Actual')
+    plt.scatter(X_test[x_feature], y_pred, color='r', alpha=0.6, label='Predicted')
+    plt.xlabel(x_feature)
+    plt.ylabel('Temperature')
+    plt.title(f'Temperature vs {x_feature.capitalize()} (Actual vs Predicted)')
+    plt.legend()
+    plt.show()
 
-poly = PolynomialFeatures(degree=2)
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
+def plot_3d_predictions(X_test, y_test, poly, model):
+    fig = plt.figure(figsize=(12, 8))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.scatter(X_test['month'], X_test['humidity'], y_test, color='b', label='Actual')
 
-model = LinearRegression()
-model.fit(X_train_poly, y_train)
+    month_range, humidity_range = np.linspace(X_test['month'].min(), X_test['month'].max(), 100), np.linspace(X_test['humidity'].min(), X_test['humidity'].max(), 100)
+    month_grid, humidity_grid = np.meshgrid(month_range, humidity_range)
+    X_grid_poly = poly.transform(pd.DataFrame({'month': month_grid.ravel(), 'humidity': humidity_grid.ravel()}))
 
-y_pred = model.predict(X_test_poly)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
+    y_grid_pred = model.predict(X_grid_poly).reshape(month_grid.shape)
+    ax.plot_surface(month_grid, humidity_grid, y_grid_pred, color='r', alpha=0.5)
 
-print(f'Mean Squared Error: {mse}')
-print(f'R² Score: {r2}')
+    ax.set_xlabel('Month')
+    ax.set_ylabel('Humidity')
+    ax.set_zlabel('Temperature')
+    ax.set_title('3D Plot: Temperature vs Month and Humidity')
 
-plt.figure(figsize=(10, 6))
-plt.scatter(X_test['month'], y_test, alpha=0.6, color='b', label='Actual')
-plt.scatter(X_test['month'], y_pred, color='r', alpha=0.6, label='Predicted')
-plt.xlabel('Month')
-plt.ylabel('Temperature')
-plt.title('Temperature vs Month (Actual vs Predicted)')
-plt.legend()
-plt.show()
+    scatter_proxy = plt.Line2D([0], [0], linestyle="none", marker='o', color='b')
+    surface_proxy = plt.Line2D([0], [0], linestyle="none", marker='s', color='r', alpha=0.5)
+    ax.legend([scatter_proxy, surface_proxy], ['Actual', 'Predicted Surface'])
+    plt.show()
 
-features = ['month', 'humidity']
-X = df[features]
-y = df['temperature']
+def evaluate_model(X_train, X_test, y_train, y_test, degree):
+    poly = PolynomialFeatures(degree=degree)
+    model = LinearRegression()
+    model.fit(poly.fit_transform(X_train), y_train)
+    y_pred = model.predict(poly.transform(X_test))
+    mse, r2 = mean_squared_error(y_test, y_pred), r2_score(y_test, y_pred)
+    return model, poly, y_pred, mse, r2
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+def regression_pipeline(df, features, degree=2, target='temperature', plot_3d=False):
+    X_train, X_test, y_train, y_test = train_test_split(df[features], df[target], test_size=0.2, random_state=42)
+    model, poly, y_pred, mse, r2 = evaluate_model(X_train, X_test, y_train, y_test, degree)
+    print(f'Features: {features}, MSE: {mse}, R²: {r2}')
+    plot_predictions(X_test, y_test, y_pred)
+    if plot_3d and 'humidity' in features and 'month' in features:
+        plot_3d_predictions(X_test, y_test, poly, model)
+    return model
 
-poly = PolynomialFeatures(degree=2)
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
-
-model = LinearRegression()
-model.fit(X_train_poly, y_train)
-
-y_pred = model.predict(X_test_poly)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-print(f'Mean Squared Error: {mse}')
-print(f'R² Score: {r2}')
-
-plt.figure(figsize=(10, 6))
-plt.scatter(X_test['month'], y_test, alpha=0.6, color='b', label='Actual')
-plt.scatter(X_test['month'], y_pred, color='r', alpha=0.6, label='Predicted')
-plt.xlabel('Month')
-plt.ylabel('Temperature')
-plt.title('Temperature vs Month (Actual vs Predicted)')
-plt.legend()
-plt.show()
-
-fig = plt.figure(figsize=(12, 8))
-ax = fig.add_subplot(111, projection='3d')
-ax.scatter(X_test['month'], X_test['humidity'], y_test, color='b', label='Actual')
-
-month_range = np.linspace(X_test['month'].min(), X_test['month'].max(), 100)
-humidity_range = np.linspace(X_test['humidity'].min(), X_test['humidity'].max(), 100)
-month_grid, humidity_grid = np.meshgrid(month_range, humidity_range)
-
-X_grid = pd.DataFrame({'month': month_grid.ravel(), 'humidity': humidity_grid.ravel()})
-X_grid_poly = poly.transform(X_grid)
-
-y_grid_pred = model.predict(X_grid_poly).reshape(month_grid.shape)
-
-ax.plot_surface(month_grid, humidity_grid, y_grid_pred, color='r', alpha=0.5)
-
-ax.set_xlabel('Month')
-ax.set_ylabel('Humidity')
-ax.set_zlabel('Temperature')
-ax.set_title('3D plot of Temperature vs Month and Humidity')
-
-scatter_proxy = plt.Line2D([0], [0], linestyle="none", marker='o', color='b')
-surface_proxy = plt.Line2D([0], [0], linestyle="none", marker='s', color='r', alpha=0.5)
-ax.legend([scatter_proxy, surface_proxy], ['Actual', 'Predicted Surface'])
-
-plt.show()
-
-model_1 = model
-
-features = ['month', 'year', 'humidity']
-X = df[features]
-y = df['temperature']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-poly = PolynomialFeatures(degree=2)
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
-
-model = LinearRegression()
-model.fit(X_train_poly, y_train)
-
-y_pred = model.predict(X_test_poly)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-print(f'Mean Squared Error: {mse}')
-print(f'R² Score: {r2}')
-
-plt.figure(figsize=(10, 6))
-plt.scatter(X_test['month'], y_test, alpha=0.6, color='b', label='Actual')
-plt.scatter(X_test['month'], y_pred, color='r', alpha=0.6, label='Predicted')
-plt.xlabel('Month')
-plt.ylabel('Temperature')
-plt.title('Temperature vs Month (Actual vs Predicted)')
-plt.legend()
-plt.show()
-
-model_2 = model
-
-features = ['month', 'humidity', 'speed', 'direction']
-X = df[features]
-y = df['temperature']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-poly = PolynomialFeatures(degree=2)
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
-
-model = LinearRegression()
-model.fit(X_train_poly, y_train)
-
-y_pred = model.predict(X_test_poly)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-print(f'Mean Squared Error: {mse}')
-print(f'R² Score: {r2}')
-
-plt.figure(figsize=(10, 6))
-plt.scatter(X_test['month'], y_test, alpha=0.6, color='b', label='Actual')
-plt.scatter(X_test['month'], y_pred, color='r', alpha=0.6, label='Predicted')
-plt.xlabel('Month')
-plt.ylabel('Temperature')
-plt.title('Temperature vs Month (Actual vs Predicted)')
-plt.legend()
-plt.show()
-
-model_3 = model
-
-features = ['year', 'month', 'humidity', 'speed', 'direction']
-X = df[features]
-y = df['temperature']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-poly = PolynomialFeatures(degree=2)
-X_train_poly = poly.fit_transform(X_train)
-X_test_poly = poly.transform(X_test)
-
-model = LinearRegression()
-model.fit(X_train_poly, y_train)
-
-y_pred = model.predict(X_test_poly)
-mse = mean_squared_error(y_test, y_pred)
-r2 = r2_score(y_test, y_pred)
-
-print(f'Mean Squared Error: {mse}')
-print(f'R² Score: {r2}')
-
-plt.figure(figsize=(10, 6))
-plt.scatter(X_test['month'], y_test, alpha=0.6, color='b', label='Actual')
-plt.scatter(X_test['month'], y_pred, color='r', alpha=0.6, label='Predicted')
-plt.xlabel('Month')
-plt.ylabel('Temperature')
-plt.title('Temperature vs Month (Actual vs Predicted)')
-plt.legend()
-plt.show()
-
-model_4 = model
+models = [
+    regression_pipeline(df, ['month']),
+    regression_pipeline(df, ['month', 'humidity'], plot_3d=True),
+    regression_pipeline(df, ['month', 'year', 'humidity']),
+    regression_pipeline(df, ['month', 'humidity', 'speed', 'direction']),
+    regression_pipeline(df, ['year', 'month', 'humidity', 'speed', 'direction'])
+]
 
 # %%
 df = df_1
