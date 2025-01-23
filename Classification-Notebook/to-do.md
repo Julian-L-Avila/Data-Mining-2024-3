@@ -1,14 +1,14 @@
 # To-Do
-- [ ] Determine Dataset
-- [ ] Implement Methods
-	- [ ] Logistic Regresion
-	- [ ] SVM
+- [x] Determine Dataset
+- [x] Implement Methods
+	- [x] Logistic Regresion
+	- [x] SVM
 	- [ ] KNN
-	- [ ] Decision Tree
+	- [x] Decision Tree
 	- [ ] Naïve Bayes
 - [ ] Determine Hyperparameters
-	- [ ] Logistic Regresion
-	- [ ] SVM
+	- [x] Logistic Regresion
+	- [x] SVM
 	- [ ] KNN
-	- [ ] Decision Tree
+	- [x] Decision Tree
 	- [ ] Naïve Bayes
