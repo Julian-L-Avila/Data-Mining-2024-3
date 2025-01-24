@@ -51,6 +51,56 @@ sns.scatterplot(data=iris_df, x=iris.feature_names[2], y=iris.feature_names[3], 
 plt.title('Petal Length vs Petal Width')
 plt.show()
 
+# %%
+# %%
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from sklearn.datasets import load_iris
+
+# Load the Iris dataset
+iris = load_iris()
+iris_df = pd.DataFrame(data=iris.data, columns=iris.feature_names)
+iris_df['target'] = iris.target
+
+# %%
+# 3D plot for Sepal Length, Sepal Width, and Petal Length
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Plotting the points
+scatter = ax.scatter(iris_df[iris.feature_names[0]], iris_df[iris.feature_names[1]], iris_df[iris.feature_names[2]],
+                     c=iris_df['target'], cmap='Set1', marker='o')
+
+# Adding labels
+ax.set_xlabel(iris.feature_names[0])
+ax.set_ylabel(iris.feature_names[1])
+ax.set_zlabel(iris.feature_names[2])
+plt.title('3D Plot: Sepal Length, Sepal Width, and Petal Length')
+
+# Show the plot
+plt.show()
+
+# %%
+# 3D plot for Sepal Length, Petal Length, and Petal Width
+fig = plt.figure(figsize=(10, 8))
+ax = fig.add_subplot(111, projection='3d')
+
+# Plotting the points
+scatter = ax.scatter(iris_df[iris.feature_names[0]], iris_df[iris.feature_names[2]], iris_df[iris.feature_names[3]],
+                     c=iris_df['target'], cmap='Set1', marker='o')
+
+# Adding labels
+ax.set_xlabel(iris.feature_names[0])
+ax.set_ylabel(iris.feature_names[2])
+ax.set_zlabel(iris.feature_names[3])
+plt.title('3D Plot: Sepal Length, Petal Length, and Petal Width')
+
+# Show the plot
+plt.show()
+
+
 # %% [markdown]
 ## Logistic Regression
 # %% Import libraries
@@ -384,3 +434,76 @@ plot_tree(tree_model, filled=True, feature_names=X.columns, class_names=data.tar
 plt.title(f"Decision Tree (Depth={best_depth})", fontsize=16)
 plt.show()
 
+# %% [markdown]
+## KNN
+# %%
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# %%
+iris = load_iris()
+X, y = iris.data, iris.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+def evaluate_knn(k_values):
+    results = []
+    for k in k_values:
+        knn = KNeighborsClassifier(n_neighbors=k)
+        knn.fit(X_train, y_train)
+        train_pred = knn.predict(X_train)
+        test_pred = knn.predict(X_test)
+
+        train_acc = accuracy_score(y_train, train_pred)
+        test_acc = accuracy_score(y_test, test_pred)
+        diff = abs(train_acc - test_acc)
+
+        results.append((k, train_acc, test_acc, diff))
+    return results
+
+# %%
+results = evaluate_knn(range(1, 21))
+
+best_train = max(results, key=lambda x: x[1])
+best_test = max(results, key=lambda x: x[2])
+lowest_diff = min(results, key=lambda x: x[3])
+
+optimal_k = lowest_diff[0]
+knn = KNeighborsClassifier(n_neighbors=optimal_k)
+knn.fit(X_train, y_train)
+y_pred = knn.predict(X_test)
+
+# Store classification report and confusion matrix
+classification_rep = classification_report(y_test, y_pred, target_names=iris.target_names)
+conf_matrix = confusion_matrix(y_test, y_pred)
+
+# %%
+# Plot Accuracy vs. k-value for Train and Test data
+k_values = range(1, 21)
+train_accuracies = [train_acc for _, train_acc, _, _ in results]
+test_accuracies = [test_acc for _, _, test_acc, _ in results]
+
+plt.figure(figsize=(10, 6))
+plt.plot(k_values, train_accuracies, label='Train Accuracy', marker='o', linestyle='-', color='b')
+plt.plot(k_values, test_accuracies, label='Test Accuracy', marker='o', linestyle='-', color='r')
+plt.title('Train vs Test Accuracy for Different k-values')
+plt.xlabel('k-value (Number of Neighbors)')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+print(optimal_k)
+# %%
+# Plot confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', xticklabels=iris.target_names, yticklabels=iris.target_names)
+plt.title('Confusion Matrix')
+plt.xlabel('Predicted')
+plt.ylabel('True')
+plt.show()
