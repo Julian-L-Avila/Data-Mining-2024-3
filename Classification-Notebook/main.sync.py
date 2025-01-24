@@ -281,3 +281,106 @@ plt.xlabel('Predicted')
 plt.ylabel('True')
 plt.show()
 
+# %% [markdown]
+## Decision Tree
+# %% Imports and Data Loading
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, ConfusionMatrixDisplay
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_iris
+
+# Load data
+data = load_iris(as_frame=True)
+X, y = data.data, data.target
+
+# %% Train and Evaluate Decision Tree Model
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+tree_model = DecisionTreeClassifier(criterion="entropy", max_depth=2, random_state=42)
+
+tree_model.fit(X_train, y_train)
+
+y_pred = tree_model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred, target_names=data.target_names)
+
+print(f'Accuracy: {accuracy * 100:.2f}%')
+print('\nClassification Report:')
+print(class_report)
+
+# %% Plot Confusion Matrix
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=data.target_names)
+disp.plot(cmap=plt.cm.Blues)
+plt.title("Confusion Matrix")
+plt.show()
+
+# %% Decision Tree Plot
+plt.figure(figsize=(12, 8))
+plot_tree(tree_model, filled=True, feature_names=X.columns, class_names=data.target_names, rounded=True, proportion=False)
+plt.title("Decision Tree (Depth=2)", fontsize=16)
+plt.show()
+
+# %% Train and Evaluate Decision Tree Model with Various Depths
+depths = range(1, 21)  # Check tree depths from 1 to 20
+train_accuracies = []
+test_accuracies = []
+
+for depth in depths:
+    tree_model = DecisionTreeClassifier(criterion="entropy", max_depth=depth, random_state=42)
+    tree_model.fit(X_train, y_train)
+
+    # Train and test accuracy
+    train_acc = accuracy_score(y_train, tree_model.predict(X_train))
+    test_acc = accuracy_score(y_test, tree_model.predict(X_test))
+
+    train_accuracies.append(train_acc)
+    test_accuracies.append(test_acc)
+
+# Find the best depth
+best_depth = depths[np.argmin(abs(np.array(test_accuracies) - np.array(train_accuracies)))]
+
+print(f'Best depth: {best_depth}')
+print(f'Accuracy at best depth: {test_accuracies[best_depth - 1] * 100:.2f}%')
+
+# %% Plot Accuracies as Function of Depth
+plt.figure(figsize=(8, 6))
+plt.plot(depths, train_accuracies, label="Train Accuracy", marker='o')
+plt.plot(depths, test_accuracies, label="Test Accuracy", marker='o')
+plt.xlabel('Tree Depth')
+plt.ylabel('Accuracy')
+plt.title('Accuracy vs Tree Depth')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# %% Final Model with Best Depth
+tree_model = DecisionTreeClassifier(criterion="entropy", max_depth=best_depth, random_state=42)
+tree_model.fit(X_train, y_train)
+
+y_pred = tree_model.predict(X_test)
+
+# Accuracy and confusion matrix for the final model
+accuracy = accuracy_score(y_test, y_pred)
+conf_matrix = confusion_matrix(y_test, y_pred)
+class_report = classification_report(y_test, y_pred, target_names=data.target_names)
+
+print(f'Accuracy at best depth: {accuracy * 100:.2f}%')
+print('\nClassification Report:')
+print(class_report)
+
+# %% Plot Confusion Matrix for Final Model
+disp = ConfusionMatrixDisplay(confusion_matrix=conf_matrix, display_labels=data.target_names)
+disp.plot(cmap=plt.cm.Blues)
+plt.title(f"Confusion Matrix (Depth={best_depth})")
+plt.show()
+
+# %% Decision Tree Plot for Best Depth
+plt.figure(figsize=(12, 8))
+plot_tree(tree_model, filled=True, feature_names=X.columns, class_names=data.target_names, rounded=True, proportion=False)
+plt.title(f"Decision Tree (Depth={best_depth})", fontsize=16)
+plt.show()
+
