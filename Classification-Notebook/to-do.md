@@ -4,8 +4,8 @@
 	- [x] Logistic Regression (Camilo)
 	- [x] SVM (Camilo)
 	- [x] Decision Tree (Camilo)
-	- [ ] KNN (Julian)
-	- [ ] Naïve Bayes (Julian)
+	- [x] KNN (Julian)
+	- [x] Naïve Bayes (Julian)
 - [ ] Determine Hyperparameters
 	- [ ] Logistic Regression
 	- [ ] SVM
