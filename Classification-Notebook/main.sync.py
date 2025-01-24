@@ -507,3 +507,58 @@ plt.title('Confusion Matrix')
 plt.xlabel('Predicted')
 plt.ylabel('True')
 plt.show()
+
+# %% [markdown]
+## Naïve Bayes
+# %% Import necessary libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+
+# %% Load Iris dataset
+from sklearn.datasets import load_iris
+data = load_iris()
+X = data.data
+y = data.target
+
+# %% Split the dataset into train and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# %% Grid search to find the best hyperparameters (in this case, smoothing parameter for GaussianNB)
+param_grid = {'var_smoothing': np.logspace(0,-9, num=100)}
+grid_search = GridSearchCV(GaussianNB(), param_grid, cv=5, scoring='accuracy')
+grid_search.fit(X_train, y_train)
+
+# %% Best hyperparameters
+print(f"Best hyperparameter: {grid_search.best_params_}")
+
+# %% Train the model with the best parameters
+best_nb = grid_search.best_estimator_
+y_pred = best_nb.predict(X_test)
+
+# %% Classification report and metrics
+print(f"Accuracy: {accuracy_score(y_test, y_pred)}")
+print(f"Classification Report:\n{classification_report(y_test, y_pred)}")
+
+# %% Plot accuracy vs. var_smoothing parameter
+results = grid_search.cv_results_
+plt.figure(figsize=(8, 6))
+plt.semilogx(results['param_var_smoothing'], results['mean_test_score'])
+plt.xlabel('var_smoothing')
+plt.ylabel('Mean Accuracy')
+plt.title('Accuracy vs. var_smoothing')
+plt.grid(True)
+plt.show()
+
+# %% Confusion matrix plot
+cm = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(6, 5))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=data.target_names, yticklabels=data.target_names)
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
