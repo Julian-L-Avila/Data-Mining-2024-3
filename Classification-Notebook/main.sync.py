@@ -562,3 +562,202 @@ plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.title('Confusion Matrix')
 plt.show()
+
+# %% [markdown]
+# ## Hyperparámetros:
+
+# %% [markdown]
+# ### 1. Logistic Regresion:
+
+# %% [markdown]
+# #### 1.1. C: (inversa de la regularización). (Por defecto: '1.0')
+#
+# #### Descripción:
+# Controla la regularización L2 en el modelo. Un valor alto de C significa menos regularización (el modelo se ajustará más a los datos), mientras que un valor bajo de C significa más regularización (el modelo será más simple y generalizará mejor).
+
+# %%
+model = LogisticRegression(C=1.0)
+
+# %% [markdown]
+# #### 1.2. solver: Método de optimización. (Por defecto: 'lbfgs')
+#
+# #### Descripción: 
+# Especifica el algoritmo utilizado para optimizar la función de coste de la regresión logística.
+#
+# #### Opciones comunes:
+# - 'liblinear': Un algoritmo eficiente para pequeños conjuntos de datos y modelos binarios.
+# - 'newton-cg': Utiliza el método de Newton para optimizar, bueno para problemas más grandes y multiclasificación.
+# - 'lbfgs': Un optimizador quasi-Newton que funciona bien para problemas más grandes.
+# - 'saga': Algoritmo de optimización que también es eficiente con grandes datasets y permite la regularización elastic net.
+
+# %%
+model = LogisticRegression(solver='lbfgs')
+
+# %% [markdown]
+# #### 1.3. penalty: Tipo de regularización. (Por defecto: 'l2')
+#
+# #### Descripción: 
+# Tipo de regularización utilizada en la regresión logística. En general, los dos tipos más comunes son:
+#
+# - L2: Regularización de Ridge, que es la más común y la que se usa por defecto.
+# - L1: Regularización de Lasso, que puede inducir una sparsidad (es decir, hacer que algunos coeficientes del modelo sean cero).
+# - elasticnet: Combinación de L1 y L2, útil cuando se desea un equilibrio entre ambos.
+
+# %%
+model = LogisticRegression(penalty='l2')
+
+# %% [markdown]
+# #### 1.4. max_iter: Número máximo de iteraciones para la optimización. (Por defecto: 100)
+#
+# #### Descripción: 
+# Número máximo de iteraciones que el algoritmo puede realizar durante la optimización.
+
+# %%
+model = LogisticRegression(max_iter=100)
+
+# %% [markdown]
+# #### 1.5. tol: determina la precisión de la convergencia en el proceso de optimización. (Por defecto: 1e-4)
+#
+# #### Descripción: 
+# Determina la tolerancia para la convergencia del optimizador. Si la mejora entre iteraciones sucesivas es menor que esta tolerancia, el algoritmo se detiene.
+
+# %%
+model = LogisticRegression(tol=1e-4)
+
+# %% [markdown]
+# ### 2. SVM:
+
+# %% [markdown]
+# #### 2.1. C: (parametro de penalización) Controla el margen y los errores. (Por defecto: C=1.0)
+#
+# #### Descripción: 
+# Similar al de la regresión logística, C es un parámetro que controla el equilibrio entre el margen máximo (generalización) y los errores de clasificación en el conjunto de entrenamiento.
+
+# %%
+model = SVC(C=1.0)
+
+# %% [markdown]
+# #### 2.2. kernel: Funcion nucleo (Por defecto: 'rbf')
+#
+# #### Descripción: 
+# Define el tipo de función de núcleo que se usa para transformar los datos en un espacio de características de mayor dimensión, donde se pueden encontrar los márgenes óptimos.
+#
+# ##### tipos de kernel:
+# - 'linear': El núcleo lineal es adecuado para problemas donde las clases son separables de manera lineal.
+# - 'poly': El núcleo polinómico se usa cuando las clases no son lineales pero pueden separarse mediante un polinomio.
+# - 'rbf' (Radial Basis Function): Es el núcleo más común, utilizado cuando las clases son no lineales y separables mediante una función gaussiana.
+# - 'sigmoid': Menos común, utilizado para problemas no lineales con una frontera de decisión sigmoidea.
+
+# %%
+model = SVC(kernel='rbf')
+
+# %% [markdown]
+# #### 2.3. gamma: Parámetro del núcleo. (Por defecto: 'scale')
+#
+# #### Descripción: 
+# El parámetro gamma controla el alcance de la influencia de un solo punto de datos sobre la clasificación.
+
+# %%
+model = SVC(gamma='scale')
+
+# %% [markdown]
+# #### 2.4. degree: Grado del polinomio para el kernel 'poly'. (Por defecto: degree=3)
+#
+# #### Descripción: 
+# Este parámetro es relevante solo cuando se usa el núcleo polinómico ('poly'). Especifica el grado del polinomio utilizado para mapear los datos al espacio de características.
+
+# %%
+model = SVC(kernel='poly', degree=3)
+
+# %% [markdown]
+# #### 2.5. shrinking: Usar heurística de "shrinking". (Por defecto: shrinking=True)
+#
+# #### Descripción: 
+# Este parámetro indica si se debe utilizar la heurística de "shrinking" durante la optimización del SVM.
+#
+# - 'True': Aplica la heurística de "shrinking", lo que puede hacer que el algoritmo converja más rápido al eliminar ciertos puntos durante el entrenamiento.
+# - 'False': No se aplica la heurística de "shrinking", lo que puede hacer el proceso más lento pero más exhaustivo.
+
+# %%
+model = SVC(shrinking=True)
+
+# %% [markdown]
+# ### 3. Decision Tree:
+
+# %% [markdown]
+# #### 3.1. max_depth: Profundidad máxima del árbol. (Por defecto: max_depth=None)
+#
+# #### Descripción: 
+# Este parámetro controla la profundidad máxima del árbol de decisión, es decir, cuántos niveles de nodos puede tener el árbol.
+#
+# - Un valor alto de max_depth permite que el árbol crezca más y capture patrones más complejos, lo que puede llevar a sobreajuste si es demasiado alto.
+# - Un valor bajo de max_depth limita el crecimiento del árbol y hace que el modelo sea más general y menos propenso a sobreajustar.
+#
+# #### Valor por defecto: 
+# max_depth=None (lo que significa que el árbol se expandirá hasta que cada hoja contenga menos de min_samples_split muestras).
+
+# %%
+model = DecisionTreeClassifier(max_depth=5)
+
+# %% [markdown]
+# #### 3.2. min_samples_split: Número mínimo de muestras requeridas para dividir un nodo. (Por defecto: min_samples_split=2)
+#
+# #### Descripción: 
+# Especifica el número mínimo de muestras requeridas para dividir un nodo interno.
+#
+# - Un valor bajo de min_samples_split permitirá que el árbol se divida en nodos más pequeños, lo que puede llevar a sobreajuste.
+# - Un valor alto de min_samples_split hará que el árbol no divida los nodos a menos que haya un número suficiente de muestras, lo que hace que el modelo sea más generalizable.
+
+# %%
+model = DecisionTreeClassifier(min_samples_split=10)
+
+# %% [markdown]
+# #### 3.3. min_samples_leaf: Número mínimo de muestras en una hoja. (Por defecto: min_samples_leaf=1)
+#
+# #### Descripción: 
+# Controla el número mínimo de muestras que debe tener una hoja para considerarse válida.
+# - Un valor bajo de min_samples_leaf puede generar muchas hojas pequeñas, lo que puede llevar a sobreajuste.
+# - Un valor alto hace que las hojas contengan más muestras y, por lo tanto, puede reducir el sobreajuste.
+
+# %%
+model = DecisionTreeClassifier(min_samples_leaf=1)
+
+# %% [markdown]
+# #### 3.4. max_features: Número máximo de características a considerar en cada división. (Por defecto: max_features=None)
+#
+#
+# #### Descripción: 
+# Especifica el número máximo de características que se deben considerar al buscar la mejor división para un nodo.
+#
+# - Si se ajusta a un valor pequeño, reduces la complejidad del modelo y puedes ayudar a evitar el sobreajuste, pero también puede reducir la precisión.
+# - Si se establece como 'auto' o 'sqrt', utiliza la raíz cuadrada del número total de características. 'log2' usa el logaritmo en base 2 del número de características.
+
+# %%
+model = DecisionTreeClassifier(max_features='None')
+
+# %% [markdown]
+# #### 3.5. criterion: Función de calidad de la división. (Por defecto: criterion='gini')
+#
+# #### Descripción: 
+# Controla la función de evaluación utilizada para medir la calidad de las divisiones en el árbol.
+#
+# - 'gini': Usa el índice de Gini, que mide la pureza de las divisiones. Es el valor por defecto.
+# - 'entropy': Usa la entropía, que mide la incertidumbre o la impureza de las divisiones.
+
+# %%
+model = DecisionTreeClassifier(criterion='gini')
+
+# %% [markdown]
+# ### KNN
+# - K-Nearest Neighbors (KNN): n_neighbors: The number of neighbors to use for knearest neighbors classification.
+# - weights: Strategy for weighting the neighbors, options include 'uniform' (all points are weighted equally) or 'distance' (points closer to the query point are weighted more heavily).
+# - algorithm: Algorithm used to compute the nearest neighbors, options include 'auto', 'ball_tree', 'kd_tree', or 'brute'.
+# - leaf_size: The leaf size passed to the BallTree or KDTree algorithm.
+# - p: Power parameter for the Minkowski distance metric. When p = 1, it’s equivalent to Manhattan distance, and when p = 2, it’s Euclidean distance.
+# - metric: The distance metric to use, options include 'minkowski', 'euclidean', 'manhattan', etc.
+
+# %% [markdown]
+# ### Naive Bayes:
+# - alpha (for MultinomialNB): Smoothing parameter to prevent zero probabilities for features not seen in the training data.
+# - fit_prior (for MultinomialNB, GaussianNB): Whether to learn class prior probabilities or assume uniform class priors.
+# - class_prior (for MultinomialNB, GaussianNB): Prior probabilities of the classes. If set to None, it is automatically computed from the training data.

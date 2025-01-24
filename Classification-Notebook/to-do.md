@@ -6,9 +6,9 @@
 	- [x] Decision Tree (Camilo)
 	- [x] KNN (Julian)
 	- [x] Naïve Bayes (Julian)
-- [ ] Determine Hyperparameters
-	- [ ] Logistic Regression
-	- [ ] SVM
-	- [ ] KNN
-	- [ ] Decision Tree
-	- [ ] Naïve Bayes
+- [x] Determine Hyperparameters
+	- [x] Logistic Regression
+	- [x] SVM
+	- [x] KNN
+	- [x] Decision Tree
+	- [x] Naïve Bayes
