@@ -1,14 +1,18 @@
 # To-Do
 - [x] Determine Dataset (Iris)
 - [ ] Implement Methods
-	- [x] Logistic Regression (Camilo)
-	- [x] SVM (Camilo)
-	- [x] Decision Tree (Camilo)
-	- [x] KNN (Julian)
-	- [x] Naïve Bayes (Julian)
-- [ ] Determine Hyperparameters
-	- [ ] Logistic Regression
+	- [ ] Logistic Regresion
 	- [ ] SVM
+- [x] Determine Dataset
+- [x] Implement Methods
+	- [x] Logistic Regresion
+	- [x] SVM
 	- [ ] KNN
-	- [ ] Decision Tree
+	- [x] Decision Tree
+	- [ ] Naïve Bayes
+- [ ] Determine Hyperparameters
+	- [x] Logistic Regresion
+	- [x] SVM
+	- [ ] KNN
+	- [x] Decision Tree
 	- [ ] Naïve Bayes
