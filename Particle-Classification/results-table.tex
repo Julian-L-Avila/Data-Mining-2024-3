@@ -1,0 +1,41 @@
+\documentclass{article}
+\usepackage{pgfplotstable}
+
+\pgfplotsset{compat=newest}
+\renewcommand{\arraystretch}{1.2}
+\usepackage{microtype}
+
+
+\begin{document}
+
+\begin{table}
+  \centering
+  \pgfplotstabletypeset[
+  col sep=tab,
+  header=true,
+  columns={Model,Accuracy,Parameters},
+  columns/Model/.style={column name=Model, string type},
+  columns/Accuracy/.style={column name=Accuracy, fixed, fixed zerofill, precision=3},
+  columns/Parameters/.style={column name=Parameters, string type},
+  every head row/.style={before row=\hline, after row=\hline},
+  every last row/.style={after row=\hline}
+  ]{
+    Model	Accuracy	Parameters
+    RF	0.903	n=300
+    GB	0.902	n=100
+    Voting	0.902	soft(KNN, NB, DT, SVM)
+    SVM	0.901	--
+    LG	0.898	--
+    BDT	0.897	n=100
+    Stack	0.895	--
+    DT	0.893	depth=5
+    KNN	0.885	k=10
+    NB	0.882	--
+    CV	0.865	--
+  }
+  \caption{Model accuracy comparison. Best features: P14, P10, P6.}
+  \label{tab:accuracy}
+\end{table}
+
+\end{document}
+
