@@ -21,7 +21,17 @@ void GenerateAndSaveData(double ampMin, double ampMax, double freqMin, double fr
 	}
 }
 
+void GenerateHarmonicOscillatorData(double mass, double amplitude, double frequency, const std::string& filename) {
+	std::ofstream file(filename);
+	for (int i = 0; i < 200; ++i) {
+		double time = i * 0.1;
+		double position = amplitude * cos(2.0 * M_PI * frequency * time);
+		file << mass << '\t' << amplitude << '\t' << frequency << '\t' << time << '\t' << position << '\n';
+	}
+}
+
 int main() {
-	GenerateAndSaveData(0.5, 10.0, 0.1, 10.0, "train.tsv");
+	GenerateAndSaveData(0.5, 3.0, 0.1, 2.5, "train.tsv");
+	GenerateHarmonicOscillatorData(2.0, 1.0, 0.5, "harmonic-oscillator.tsv");
 }
 
